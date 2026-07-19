@@ -1,0 +1,17 @@
+baseURL = "https://equivalencepro.fr/"
+title = "Équivalence Pro"
+defaultContentLanguage = "fr"
+enableRobotsTXT = true
+summaryLength = 30
+disableKinds = ["taxonomy", "term"]
+
+[params]
+  description = "Guides d'achat, comparatifs et recommandations Amazon orientés conversion."
+  author = "Équivalence Pro"
+
+[markup.goldmark.renderer]
+  unsafe = true
+
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]

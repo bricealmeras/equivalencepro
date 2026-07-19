@@ -1,0 +1,16 @@
+{{ define "main" }}
+  <article class="post">
+    <header>
+      <h1>{{ .Title }}</h1>
+      <p>{{ .Date.Format "2 January 2006" }}</p>
+    </header>
+    <div class="content">
+      {{ .Content }}
+    </div>
+    {{ with .Params.affiliate_link }}
+      <p class="cta">
+        <a class="button" href="{{ . }}" target="_blank" rel="noopener">Acheter sur Amazon</a>
+      </p>
+    {{ end }}
+  </article>
+{{ end }}

@@ -1,0 +1,18 @@
+{{ define "main" }}
+  <section class="hero">
+    <h1>Équivalence Pro</h1>
+    <p>Des guides d'achat rapides, clairs et orientés conversion pour comparer les meilleurs produits Amazon.</p>
+    <a class="button" href="/posts/">Voir les guides</a>
+  </section>
+
+  <section class="posts">
+    <h2>Derniers guides</h2>
+    {{ range first 6 (where .Site.RegularPages "Type" "posts") }}
+      <article>
+        <h3><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+        <p>{{ .Summary }}</p>
+        <a class="button secondary" href="{{ .RelPermalink }}">Lire le guide</a>
+      </article>
+    {{ end }}
+  </section>
+{{ end }}
