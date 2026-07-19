@@ -19,7 +19,7 @@ Le marché de cuisine connectée est vaste, ce qui rend le choix d'un produit ad
 | --- | --- | --- | --- |
 | Moulinex Cookeo Connect | Cuisson automatique, Application connectée, Large choix de recettes | À vérifier | [B0859Z7K66](https://www.amazon.fr/dp/B0859Z7K66/?tag=equivalencepro-21) |
 | KitchenAid Artisan Robot Multifonction | Moteur puissant, Accessoires inclus, Design rétro durable | À vérifier | [B00005UP2P](https://www.amazon.fr/dp/B00005UP2P/?tag=equivalencepro-21) |
-| Nespresso Vertuo Next | Café en capsules, Appareil connecté, Facile à utiliser | À vérifier | [B0F32P5T8C](https://www.amazon.fr/dp/B0F32P5T8C/?tag=equivalencepro-21) |
+| Nespresso Vertuo Next | Café en capsules, Appareil connecté, Facile à utiliser | À vérifier | [B0B8DS337Z](https://www.amazon.fr/dp/B0B8DS337Z/?tag=equivalencepro-21) |
 
 ## Pourquoi ce produit ?
 Moulinex Cookeo Connect se distingue par ses caractéristiques clés et sa valeur d'usage. Nous passons en revue ses principaux atouts, les points à surveiller et les recommandations d'utilisation.
