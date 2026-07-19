@@ -5,17 +5,18 @@ from datetime import date, datetime
 from pathlib import Path
 
 try:
-    import google.generativeai as genai
+    from google import genai
 except Exception:
     genai = None
 
 ROOT = Path(__file__).resolve().parent
 THEMES_PATH = ROOT / "themes.json"
+PRODUCTS_PATH = ROOT / "products.json"
 OUTPUT_DIR = ROOT / "content" / "posts"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-AFFILIATE_TAG = "equivalencepro-21"
-MODEL_NAME = "gemini-2.5-flash"
+AFFILIATE_TAG = os.getenv("AFFILIATE_TAG", "equivalencepro-21")
+MODEL_NAME = "gemini-3.5-flash"
 
 
 def load_themes() -> list[str]:
@@ -24,38 +25,120 @@ def load_themes() -> list[str]:
     return data.get("themes", [])
 
 
+def load_products() -> list[dict[str, str]]:
+    if not PRODUCTS_PATH.exists():
+        return []
+    with PRODUCTS_PATH.open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
+    return data.get("products", [])
+
+
 def choose_theme(themes: list[str]) -> str:
     start_date = date(2024, 1, 1)
     delta_days = (date.today() - start_date).days
     return themes[delta_days % len(themes)]
 
 
-def build_prompt(theme: str) -> str:
-    return f"""Tu es un copywriter SEO français spécialisé en affiliation Amazon.
-Rédige un guide d'achat complet sur le thème suivant : {theme}.
-Exigences :
-- Longueur cible : 2500 mots.
-- Structure Markdown avec H1, H2 et H3.
-- Ajouter un tableau comparatif.
-- Optimiser le contenu pour le SEO avec une introduction forte, des sous-titres riches et une conclusion orientée conversion.
-- Intégrer au moins trois produits distincts avec leurs ASIN sous forme de codes alphanumériques de 10 caractères, par exemple B0ABC12345.
-- Ajouter une section FAQ et une section avis rapide.
-- Termine par une synthèse finale orientée achat.
-- Réponds uniquement avec du Markdown prêt à publier.
-"""
+def build_prompt(title: str, theme: str, products: list[dict[str, str]]) -> str:
+    prompt = [
+        "Tu es un copywriter SEO français spécialisé en affiliation Amazon.",
+        f"Rédige un article d'achat expert pour le produit suivant : {title}.",
+        f"Le guide doit être optimisé pour la catégorie : {theme}.",
+        "Exigences :",
+        "- Longueur cible : 2000 mots.",
+        "- Structure Markdown avec H1, H2 et H3.",
+        "- Ajouter un tableau comparatif.",
+        "- Optimiser le contenu pour le SEO avec une introduction claire, des sous-titres riches et une conclusion orientée conversion.",
+        "- Ajouter une section FAQ et une section avis rapide.",
+        "- Inclure un bloc de comparaison entre le produit principal et deux produits concurrents.",
+        "- Réponds uniquement avec du Markdown prêt à publier."
+    ]
+
+    if products:
+        prompt.append("Utilise les produits suivants et leurs ASIN dans le guide :")
+        for product in products:
+            name = product.get("name", "Produit inconnu")
+            asin = product.get("asin", "B000000000")
+            highlights = product.get("highlights", [])
+            prompt.append(f"- {name} (ASIN : {asin}).")
+            if highlights:
+                prompt.append(f"  Points clés : {', '.join(highlights)}.")
+        prompt.append("N'inclus pas de liens Amazon complets dans la réponse. Je vais convertir les ASINs en liens affiliés corrects après génération.")
+        prompt.append("N'utilise pas d'ASIN fictifs si des ASIN produit sont fournis.")
+
+    return "\n".join(prompt) + "\n"
 
 
 def format_affiliate_links(text: str) -> str:
-    pattern = re.compile(r"\b([A-Z0-9]{10})\b")
+    # Force every Amazon /dp/ URL to use the affiliate tag exactly once.
+    text = re.sub(
+        r"https://www\.amazon\.fr/dp/([A-Z0-9]{10})(?:/)?(?:\?[^\s\)]*)?",
+        lambda m: f"https://www.amazon.fr/dp/{m.group(1)}/?tag={AFFILIATE_TAG}",
+        text,
+    )
 
-    def replace(match: re.Match[str]) -> str:
+    # Convert plain ASIN mentions into affiliate markdown links.
+    def wrap_asin(match: re.Match[str]) -> str:
         asin = match.group(1)
+        before = match.string[max(0, match.start() - 10) : match.start()]
+        after = match.string[match.end() : match.end() + 10]
+
+        if "/dp/" in before or "/dp/" in after:
+            return asin
+        if before.endswith("[") or after.startswith("]("):
+            return asin
+
         return f"[{asin}](https://www.amazon.fr/dp/{asin}/?tag={AFFILIATE_TAG})"
 
-    return pattern.sub(replace, text)
+    return re.sub(r"(?<![A-Z0-9/\[\]\(])([A-Z0-9]{10})(?![A-Z0-9/\]\)])", wrap_asin, text)
 
 
-def fallback_content(theme: str) -> str:
+def fallback_content(title: str, theme: str, products: list[dict[str, str]]) -> str:
+    if products:
+        product_lines = "\n".join(
+            f"| {item.get('name', 'Produit')} | {', '.join(item.get('highlights', ['Bon rapport qualité-prix']))} | À vérifier | {item.get('asin', 'B000000000')} |"
+            for item in products[:3]
+        )
+        return f"""# Guide d'achat : {title}
+
+## Introduction
+Le marché de {theme.lower()} est vaste, ce qui rend le choix d'un produit adapté difficile. Ce guide présente le produit principal et compare ses forces avec d'autres alternatives similaires.
+
+## Produits comparés
+| Produit | Points forts | Limites | ASIN |
+| --- | --- | --- | --- |
+{product_lines}
+
+## Pourquoi ce produit ?
+{title} se distingue par ses caractéristiques clés et sa valeur d'usage. Nous passons en revue ses principaux atouts, les points à surveiller et les recommandations d'utilisation.
+
+## Critères d'achat
+### Performance
+Privilégiez les produits avec une connectivité fiable, une installation facile et un support durable.
+
+### Qualité et design
+Un bon produit connecté doit offrir une interface intuitive, une bonne finition et une intégration fluide avec les assistants vocaux.
+
+### Rapport qualité-prix
+Comparez les fonctionnalités, la durée de vie et les avis clients avant de choisir.
+
+## Recommandations
+### Produit principal
+{title} est recommandé pour les utilisateurs qui veulent une expérience fluide et une compatibilité large.
+
+### Alternatives
+Les autres produits présentés dans le tableau sont de bonnes alternatives selon votre budget et vos besoins.
+
+## FAQ
+### Pourquoi ce produit est-il intéressant ?
+Il combine fonctionnalités avancées, facilité d'utilisation et design moderne.
+
+### Est-ce un bon achat Amazon ?
+Oui, si vous cherchez un produit adapté à votre thème et capable de s'intégrer dans un environnement connecté.
+
+## Conclusion
+Pour un achat réussi dans le domaine de {theme.lower()}, focalisez-vous sur la qualité, la compatibilité et la durabilité du produit. {title} est une option sérieuse dans cette catégorie.
+"""
     return f"""# Guide d'achat complet : {theme}
 
 ## Introduction
@@ -106,22 +189,43 @@ Pour un achat réussi dans le domaine de {theme.lower()}, il faut comparer les f
 """
 
 
-def generate_content(theme: str) -> tuple[str, str]:
-    prompt = build_prompt(theme)
+def product_slug(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "produit"
 
-    if genai is not None and os.getenv("GEMINI_API_KEY"):
-        try:
-            genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-            model = genai.GenerativeModel(MODEL_NAME)
-            response = model.generate_content(prompt)
-            body = response.text.strip()
-        except Exception:
-            body = fallback_content(theme)
+
+def filter_products_by_theme(products: list[dict[str, str]], theme: str) -> list[dict[str, str]]:
+    return [product for product in products if product.get("category", "").lower() == theme.lower()]
+
+
+def generate_content(title: str, theme: str, products: list[dict[str, str]]) -> tuple[str, str]:
+    prompt = build_prompt(title, theme, products)
+    print(f"Generating content for product: {title} in theme: {theme}")
+    print(f"Using {len(products)} products for comparison")
+
+    use_api = genai is not None and os.getenv("GEMINI_API_KEY")
+    if use_api:
+        print("Gemini API key detected. Generating with Gemini.")
     else:
-        body = fallback_content(theme)
+        print("Gemini API unavailable. Using fallback content.")
+
+    if use_api:
+        try:
+            client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+            response = client.interactions.create(
+                model=MODEL_NAME,
+                input=prompt,
+            )
+            body = response.output_text.strip()
+            print("Gemini content generation succeeded.")
+        except Exception as exc:
+            print(f"Gemini generation failed: {exc}")
+            body = fallback_content(title, theme, products)
+            print("Fallback content generated.")
+    else:
+        body = fallback_content(title, theme, products)
 
     formatted_body = format_affiliate_links(body)
-    first_asin_match = re.search(r"https://www\.amazon\.fr/dp/([A-Z0-9]{10})/\?tag=equivalencepro-21", formatted_body)
+    first_asin_match = re.search(rf"https://www\.amazon\.fr/dp/([A-Z0-9]{{10}})/\?tag={AFFILIATE_TAG}", formatted_body)
     if first_asin_match:
         affiliate_link = f"https://www.amazon.fr/dp/{first_asin_match.group(1)}/?tag={AFFILIATE_TAG}"
     else:
@@ -130,16 +234,17 @@ def generate_content(theme: str) -> tuple[str, str]:
     return formatted_body, affiliate_link
 
 
-def write_post(theme: str, body: str, affiliate_link: str) -> None:
-    slug = re.sub(r"[^a-z0-9]+", "-", theme.lower()).strip("-") or "guide-achat"
+def write_post(title: str, theme: str, body: str, affiliate_link: str) -> None:
+    slug = product_slug(title)
     file_path = OUTPUT_DIR / f"{slug}.md"
     date_stamp = datetime.now().strftime("%Y-%m-%d")
     content = f"""---
-title: "Guide d'achat : {theme}"
+title: "Guide d'achat : {title}"
 date: {date_stamp}
 draft: false
-description: "Guide d'achat SEO et orienté conversion pour {theme.lower()}."
+description: "Guide d'achat SEO et orienté conversion pour {title}."
 tags: [affiliation, amazon, guides]
+category: "{theme}"
 slug: "{slug}"
 affiliate_link: "{affiliate_link}"
 ---
@@ -151,13 +256,23 @@ affiliate_link: "{affiliate_link}"
 
 def main() -> None:
     themes = load_themes()
+    products = load_products()
     if not themes:
         raise SystemExit("No themes found in themes.json")
 
     theme = choose_theme(themes)
-    body, affiliate_link = generate_content(theme)
-    write_post(theme, body, affiliate_link)
-    print(f"Generated content for theme: {theme}")
+    theme_products = filter_products_by_theme(products, theme)
+    if not theme_products:
+        print(f"Aucun produit réel trouvé pour le thème {theme}. Génération de contenu générique.")
+        body, affiliate_link = generate_content(theme, theme, [])
+        write_post(theme, theme, body, affiliate_link)
+        return
+
+    for product in theme_products:
+        related = [p for p in theme_products if p != product][:2]
+        body, affiliate_link = generate_content(product.get("name", "Produit"), theme, [product] + related)
+        write_post(product.get("name", "Produit"), theme, body, affiliate_link)
+    print(f"Generated {len(theme_products)} product articles for theme: {theme}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,27 @@
+{{ define "main" }}
+  <section class="page-intro">
+    <h1>Guides d'achat</h1>
+    <p>Retrouvez nos guides Amazon les plus récents, tests comparatifs et conseils d'achat optimisés pour la conversion.</p>
+  </section>
+
+  <section class="grid cards">
+    {{ range .Paginator.Pages }}
+      <article class="card">
+        <div class="card-body">
+          <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+          <p>{{ .Summary }}</p>
+        </div>
+        <div class="card-footer">
+          <a class="link-secondary" href="{{ .RelPermalink }}">Lire le guide</a>
+        </div>
+      </article>
+    {{ end }}
+  </section>
+
+  {{ if gt .Paginator.TotalPages 1 }}
+    <nav class="pagination">
+      {{ if .Paginator.HasPrev }}<a class="button secondary" href="{{ .Paginator.Prev.URL }}">← Plus récent</a>{{ end }}
+      {{ if .Paginator.HasNext }}<a class="button" href="{{ .Paginator.Next.URL }}">Plus ancien →</a>{{ end }}
+    </nav>
+  {{ end }}
+{{ end }}

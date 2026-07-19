@@ -2,18 +2,24 @@
 <html lang="fr">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0f172a">
     <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
-    <meta property="og:title" content="{{ .Title }}">
+    <meta property="og:title" content="{{ .Title }} | {{ .Site.Title }}">
     <meta property="og:description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
-    <meta property="og:type" content="website">
+    {{ if .IsPage }}<meta property="og:type" content="article">{{ else }}<meta property="og:type" content="website">{{ end }}
     <meta property="og:url" content="{{ .Permalink }}">
+    <meta property="og:site_name" content="{{ .Site.Params.siteName }}">
     <title>{{ .Title }} | {{ .Site.Title }}</title>
-    {{ template "partials/head.html" . }}
+    {{ partial "head.html" . }}
   </head>
   <body>
-    <main>
-      {{ block "main" . }}{{ end }}
-    </main>
+    <div class="page-shell">
+      {{ partial "header.html" . }}
+      <main>
+        {{ block "main" . }}{{ end }}
+      </main>
+      {{ partial "footer.html" . }}
+    </div>
   </body>
 </html>

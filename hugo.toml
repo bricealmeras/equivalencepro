@@ -1,13 +1,18 @@
 baseURL = "https://equivalencepro.fr/"
 title = "Équivalence Pro"
 defaultContentLanguage = "fr"
+locale = "fr_FR"
 enableRobotsTXT = true
 summaryLength = 30
+canonifyURLs = true
+paginate = 6
 disableKinds = ["taxonomy", "term"]
 
 [params]
-  description = "Guides d'achat, comparatifs et recommandations Amazon orientés conversion."
+  description = "Guides d'achat professionnels, comparatifs et conseils pour acheter plus intelligemment sur Amazon."
   author = "Équivalence Pro"
+  tagline = "Le guide Amazon qui vous aide à acheter malin."
+  siteName = "Équivalence Pro"
 
 [markup.goldmark.renderer]
   unsafe = true

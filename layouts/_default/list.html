@@ -1,12 +1,27 @@
 {{ define "main" }}
-  <section class="posts">
+  <section class="page-intro">
     <h1>{{ .Title }}</h1>
-    {{ range .Pages }}
-      <article>
-        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
-        <p>{{ .Summary }}</p>
-        <a class="button secondary" href="{{ .RelPermalink }}">Lire le guide</a>
+    {{ if .Content }}{{ .Content }}{{ end }}
+  </section>
+
+  <section class="grid cards">
+    {{ range .Paginator.Pages }}
+      <article class="card">
+        <div class="card-body">
+          <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+          <p>{{ .Summary }}</p>
+        </div>
+        <div class="card-footer">
+          <a class="link-secondary" href="{{ .RelPermalink }}">Lire le guide</a>
+        </div>
       </article>
     {{ end }}
   </section>
+
+  {{ if gt .Paginator.TotalPages 1 }}
+    <nav class="pagination">
+      {{ if .Paginator.HasPrev }}<a href="{{ .Paginator.Prev.URL }}" class="button secondary">← Plus récent</a>{{ end }}
+      {{ if .Paginator.HasNext }}<a href="{{ .Paginator.Next.URL }}" class="button">Plus ancien →</a>{{ end }}
+    </nav>
+  {{ end }}
 {{ end }}
