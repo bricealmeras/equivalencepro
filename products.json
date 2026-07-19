@@ -2,19 +2,19 @@
   "products": [
     {
       "name": "Amazon Echo Dot (5e génération)",
-      "asin": "B0B4R1H6Y6",
+      "asin": "B09B8X9RGM",
       "category": "Maison connectée",
       "highlights": ["Assistant vocal Alexa", "Compact et facile à installer", "Bon son pour une petite pièce"]
     },
     {
       "name": "Philips Hue White and Color Ambiance Kit",
-      "asin": "B07N1WW638",
+      "asin": "B0FJ8X8D1R",
       "category": "Maison connectée",
       "highlights": ["Éclairage connecté multicolore", "Contrôle via application", "Compatible Alexa et Google"]
     },
     {
       "name": "TP-Link Tapo C200 Caméra Wi-Fi",
-      "asin": "B07D1PQ8HS",
+      "asin": "B07XLML2YS",
       "category": "Maison connectée",
       "highlights": ["Rotation 360°", "Détection de mouvement", "Enregistrement cloud et local"]
     },
@@ -25,14 +25,14 @@
       "highlights": ["Moteur puissant", "Accessoires inclus", "Design rétro durable"]
     },
     {
-      "name": "Tefal Cook4Me+ Connect",
-      "asin": "B07B9NV15J",
+      "name": "Moulinex Cookeo Connect",
+      "asin": "B0859Z7K66",
       "category": "Cuisine connectée",
       "highlights": ["Cuisson automatique", "Application connectée", "Large choix de recettes"]
     },
     {
       "name": "Nespresso Vertuo Next",
-      "asin": "B07PV8SMWJ",
+      "asin": "B0F32P5T8C",
       "category": "Cuisine connectée",
       "highlights": ["Café en capsules", "Appareil connecté", "Facile à utiliser"]
     }

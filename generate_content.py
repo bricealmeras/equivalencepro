@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import sys
 from datetime import date, datetime
 from pathlib import Path
 
@@ -211,11 +212,11 @@ def generate_content(title: str, theme: str, products: list[dict[str, str]]) -> 
     if use_api:
         try:
             client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-            response = client.interactions.create(
+            response = client.models.generate_content(
                 model=MODEL_NAME,
-                input=prompt,
+                contents=prompt,
             )
-            body = response.output_text.strip()
+            body = response.text.strip()
             print("Gemini content generation succeeded.")
         except Exception as exc:
             print(f"Gemini generation failed: {exc}")
@@ -260,19 +261,29 @@ def main() -> None:
     if not themes:
         raise SystemExit("No themes found in themes.json")
 
-    theme = choose_theme(themes)
-    theme_products = filter_products_by_theme(products, theme)
-    if not theme_products:
-        print(f"Aucun produit réel trouvé pour le thème {theme}. Génération de contenu générique.")
-        body, affiliate_link = generate_content(theme, theme, [])
-        write_post(theme, theme, body, affiliate_link)
-        return
+    # If --all is passed in arguments or GENERATE_ALL is true, generate for all themes.
+    generate_all = "--all" in sys.argv or os.getenv("GENERATE_ALL") == "true"
 
-    for product in theme_products:
-        related = [p for p in theme_products if p != product][:2]
-        body, affiliate_link = generate_content(product.get("name", "Produit"), theme, [product] + related)
-        write_post(product.get("name", "Produit"), theme, body, affiliate_link)
-    print(f"Generated {len(theme_products)} product articles for theme: {theme}")
+    if generate_all:
+        selected_themes = themes
+        print("Generating posts for ALL themes.")
+    else:
+        selected_themes = [choose_theme(themes)]
+        print(f"Generating posts for single theme: {selected_themes[0]}")
+
+    for theme in selected_themes:
+        theme_products = filter_products_by_theme(products, theme)
+        if not theme_products:
+            print(f"Aucun produit réel trouvé pour le thème {theme}. Génération de contenu générique.")
+            body, affiliate_link = generate_content(theme, theme, [])
+            write_post(theme, theme, body, affiliate_link)
+            continue
+
+        for product in theme_products:
+            related = [p for p in theme_products if p != product][:2]
+            body, affiliate_link = generate_content(product.get("name", "Produit"), theme, [product] + related)
+            write_post(product.get("name", "Produit"), theme, body, affiliate_link)
+        print(f"Generated {len(theme_products)} product articles for theme: {theme}")
 
 
 if __name__ == "__main__":

@@ -34,6 +34,18 @@ jobs:
       - name: Generate content
         run: python generate_content.py
 
+      - name: Commit and push generated content
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/posts/
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-generate daily review articles [skip ci]"
+            git push origin main
+          else
+            echo "No new reviews generated."
+          fi
+
       - name: Build site
         run: hugo --gc --minify
 
