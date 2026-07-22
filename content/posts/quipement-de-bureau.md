@@ -1,6 +1,6 @@
 ---
 title: "Guide d'achat : Équipement de bureau"
-date: 2026-07-19
+date: 2026-07-22
 draft: false
 description: "Guide d'achat SEO et orienté conversion pour Équipement de bureau."
 tags: [affiliation, amazon, guides]
