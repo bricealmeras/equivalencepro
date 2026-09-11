@@ -1,6 +1,6 @@
 ---
 title: "Guide d'achat : Amazon Echo Dot (5e génération)"
-date: 2026-09-05
+date: 2026-09-11
 draft: false
 description: "Guide d'achat SEO et orienté conversion pour Amazon Echo Dot (5e génération)."
 tags: [affiliation, amazon, guides]
