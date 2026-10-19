@@ -1,6 +1,6 @@
 ---
 title: "Guide d'achat : Bien-être à domicile"
-date: 2026-10-13
+date: 2026-10-19
 draft: false
 description: "Guide d'achat SEO et orienté conversion pour Bien-être à domicile."
 tags: [affiliation, amazon, guides]
