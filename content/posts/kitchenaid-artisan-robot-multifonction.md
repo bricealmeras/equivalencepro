@@ -1,6 +1,6 @@
 ---
 title: "Guide d'achat : KitchenAid Artisan Robot Multifonction"
-date: 2026-11-11
+date: 2026-11-17
 draft: false
 description: "Guide d'achat SEO et orienté conversion pour KitchenAid Artisan Robot Multifonction."
 tags: [affiliation, amazon, guides]
